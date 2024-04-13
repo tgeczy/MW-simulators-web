@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mist World 3-in-1 simulator </title>
+    <style>
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+    }
+  
+    .progress-bar-label {
+      display: block;
+      margin-top: 10px;
+    }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1> Misty World, 3 in 1 simulator</h1>
+<p> This is a simple equipment enhancement simulator , a gem simulator, and a food plus drink simulator, written for Mist world. It helps you get an idea of how much enhancing might cost, with or without diamond options, or what a specific food can give in terms of a stat boost. Please note that these are based on variables I could observe in the game, but if the game is using a standard randomizer, these chances should be in the same ballpark. If the game has other secret variables that are factors to enhancements, I do not know of those. </p>
+<p> Please note that with the most recent update of enhancement guarantee successes, we can only get an average. This is why the numbers are so low, because we are averaging each level's failed enhancements. If you check the protect rune, the averages per level should be much higher. </p>
+
+<p> Also note that diamonds are estimates, with the average of 1000 diamonds costing $19.99. </p>
+<p> For gems, prices are updated once in awhile, and they are snapped to the Global (California) server, not the one located in China. </p>
+<h2>Your chances in this simulator do not reflect the actual in-game chances, and getting good luck here will not magically get you good luck in the game either. However, both the simulator and the game work on the same ideas. Smashing the "start enhance" button repeatedly in anger is encouraged. </h2>
+<p> Please reload this page by pressing Control + Shift + R to do a full-page refresh, to get the latest non-cached copy of the script. This might be needed if it's behaving oddly or after major updates. </p>
+    <!-- Radio buttons to choose which simulator to use -->
+
+    <fieldset>
+        <legend>Simulator Selection</legend>        <label>Simulator I would like to use:</label><br>
+        <input type="radio" id="useEquipmentSimulator" name="simulatorChoice" value="equipment" checked>
+        <label for="useEquipmentSimulator">Equipment Simulator</label><br>
+        <input type="radio" id="useGemSimulator" name="simulatorChoice" value="gem">
+        <label for="useGemSimulator">Gem Simulator</label>
+        <input type="radio" id="useItemSimulator" name="simulatorChoice" value="gem">
+        <label for="useItemSimulator">Food & drink simulator (beta)</label>
+
+    </fieldset>    
+<div id="EQSimulatorContainer">
+<h3> Equipment simulator </h3>
+
+    <form id="simulatorForm">
+        <label for="currentEnhancement">Current Enhancement Level:</label>
+        <select id="currentEnhancement">
+            <!-- Options go here -->
+        </select>
+        
+        <br><br>
+
+        <label for="equipmentLevel">Equipment Level:</label>
+        <select id="equipmentLevel">
+            <!-- Options go here -->
+        </select>
+
+        <br><br>
+
+        <label for="targetEnhancement">Target Enhancement Level:</label>
+        <select id="targetEnhancement">
+            <!-- Options go here -->
+        </select>
+
+        <br><br>
+<--label for="manualEnhance">Manual Enhance:</label>
+<--input type="checkbox" id="manualEnhance" checked>
+        <label for="boostRune">Boost Rune (+5% chance):</label>
+        <input type="checkbox" id="boostRune">
+        <div id="boostRuneMinLevelContainer" class="hidden">
+<label for="boostRuneMinLevel">Use boost runes after this level:</label>
+<select id="boostRuneMinLevel">
+<!-- Options go here -->
+</select>
+</div>
+<br><br>
+    <label for="protectRune">Protect Rune (no fail):</label>
+    <input type="checkbox" id="protectRune">
+    <div id="protectRuneMinLevelContainer" class="hidden">
+        <label for="protectRuneMinLevel">Use protect runes after this level:</label>
+        <select id="protectRuneMinLevel">
+            <!-- Options go here -->
+        </select>
+    </div>
+    <br><br>
+    <label for="runMultipleSimulations">Run multiple simulations:</label>
+    <input type="checkbox" id="runMultipleSimulations">
+    <div id="numSimulationsContainer" class="hidden">
+        <label for="numSimulations">Number of simulations:</label>
+        <input type="number" id="numSimulations" min="1" value="1000">
+    </div>
+    <br><br>
+
+    <button type="button" id="startEnhance">Start Enhance</button>
+</form>
+
+<br>
+
+<label for="resultField">Result:</label>
+<input type="text" id="resultField" role="status" readonly>
+</div>
+<div id="gemSimulatorContainer" class="hidden">
+    <h3>Gem Enhancement Simulator</h3>
+<p> Prices current as of Apr 12, 23:26 UTC. </p>
+<p> From the game:
+Gem
+<ol> <li> Three gems of the same color and level can be combined to form a gem of the same color that is one level higher. </li>
+<li>The combining process has a 50% chance to fail, which will cause one of the gems to shatter into a Shard of the same level. </li>
+<li> When combining level 2+ Gems, you can add a Shard of the same color and level to increase 20% success rate. </li>
+<li> When combining gems, use a corresponding Gem Protection Rune can prevent the Gem from shattering if the process failed. (This only works on calculating by shard or arnebia, not by level for now) </li> 
+<li> One Gem can be split into three Gems that are one level lower, or three Shards of the same level. Four Shards of the same color and level can be combined into a Gem of the same level. </li> </ol>
+However, in the game, counting by shards or arnebia is more of the dynamic - the game will not "auto-buy" shards for you once you are wanting a specific level until you have it. That would be nice, but it's not how life works in there. Calculating by gem level will tell you how many shards it takes to make a single level of that gem type along with the boost of the stat that specific level gives, all calculated out by current market price. The accuracy between the modes has been greatly improved with the consolidation of the gem calculating into  more common logic. While using an extra shard improves your odds a bit, it's only a 20% boost, and what is interesting is how those odds help you less and less at the higher gem levels, skewing you to purchase the gem protection runes after a certain level (typically 6 and above, since making another level 6 quickly becomes a pain.) </p>
+
+
+    <!-- Radio buttons to choose calculation mode -->
+        <fieldset>
+            <legend>Calculation Mode Selection</legend>
+    <input type="radio" id="calcByLevel" name="calcMode" value="level" checked>
+    <label for="calcByLevel">Calculate by target gem level</label><br>
+    <input type="radio" id="calcByShards" name="calcMode" value="shards">
+    <label for="calcByShards">Calculate by number of shards</label><br>
+        <label for="calcByArnebia">
+  <input type="radio" name="calcMode" id="calcByArnebia" /> Calculate by amount of Arnebia
+</label>
+        </fieldset>
+<div id="arnebiaContainer" class="hidden">
+  <label for="arnebiaAmount">Arnebia:</label>
+  <input type="number" id="arnebiaAmount" name="arnebia" min="1" />
+</div>
+    <!-- Input fields for gem level or number of shards -->
+    <div id="targetGemLevelContainer">
+        <label for="targetGemLevel">Target Gem Level:</label>
+        <input type="number" id="targetGemLevel" min="1" max="9">
+    </div>
+    <div id="numShardsContainer" class="hidden">
+        <label for="numShards">Number of Shards:</label>
+        <input type="number" id="numShards" min="1">
+    </div>
+    <!-- Gem type selection -->
+    <label for="gemType">Gem Type:</label>
+    <select id="gemType">
+        <option value="none" selected>No Gem Type</option>
+        <option value="turquoise" data-price="2045">Turquoise (Price: 2045)</option>
+        <option value="moonstone" data-price="1365">Moonstone  (Price: 1365)</option>
+        <option value="sunlight" data-price="78">Sunlight (Price: 78)</option>
+        <option value="obsidian" data-price="3465">Obsidian  (Price: 3465)</option>
+        <option value="topaz" data-price="21">Topaz (Price: 21)</option>
+        <option value="olivine" data-price="20">Olivine (Price: 20)</option>
+        <option value="grape" data-price="32">Grape stone (Price: 32)</option>
+        <option value="blond" data-price="5510">Blond jade (Price: 5510)</option>
+        <option value="garnet" data-price="5040">Garnet (Price: 5040)</option>
+        <option value="aquamarine" data-price="20">Aquamarine (Price: 20)</option>
+        <option value="spinnel" data-price="20">Spinnel (Price: 20)</option>
+        <option value="opal" data-price="2365">Opal (Price: 2365)</option>
+        <option value="tiger" data-price="2800">Tiger Eye stone (Price: 2800)</option>
+        <option value="sapphire" data-price="20">Sapphire (Price: 20)</option>
+        <option value="ruby" data-price="1800">Ruby (Price: 1800)</option>
+    </select>
+    <label for="ProtLevel">Use Gem Protection rune (399 diamond cost) </label>
+    <select id="ProtLevel" disabled="true">
+        <option value="none">don't use it, it's expensive for me</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+</select>
+
+    <!-- Checkbox for using an extra shard when possible -->
+    <label for="useExtraShard">Use extra shard when possible:</label>
+    <input type="checkbox" id="useExtraShard">
+    <!-- Button to start calculation -->
+    <button type="button" id="startGemEnhance">Start Gem Enhance</button>
+
+    <!-- Output field for the result -->
+    <label for="gemResultField">Result:</label>
+    <input type="text" id="gemResultField" role="status" readonly>
+</div>
+
+<!-- Food & Drink Simulator -->
+<div id="foodSimulatorContainer" class="hidden">
+  <h3>Food & Drink Simulator</h3>
+<p> These are early days for a food plus drink simulator to take form, but it has. Sort of. </p>
+<p> Have you ever wanted to have an endless supply of food items and drinks from weddings or events at your disposal? Did you ever wonder, "oh, if only I had 80 1-minute boosting my attack stats, I would be like a GodBless person, right?" Well maybe, maybe not. Find out for yourself using this tool. </p>
+<ul>
+<li> Choose a food or drink from the selection below. </li>
+<li> Enter your "total value", that is, the stat from your character screen you would like to see recovered or boosted. </li>
+<li> Use the checkbox if you would like progress bars to track down in realtime the item's countdown. This will begin with one progress bar, but then you can continue to press the calculate button and create multiple of them.
+ This is especially fun on drinks, try it out and see how far you get with it because why not! </li>
+<li> Finally, hit the calculate button, sit back, watch the progress bars, maybe create a song with them if your screen reader uses tones! </li>
+<li>There may be bugs around the result field, how it all works. This was just a quick and dirty JS project, and unfortunately Chat GPT dirtied up the code even more when I used it at my lunch break to finalize it, but hey, it solved some of the critical bugs with me, can I blame it then? </li>
+</ul>
+  <form id="simulatorForm">
+    <fieldset>
+      <legend>Item Selection</legend>
+      <label for="itemStore">List of Items:</label>
+      <select id="itemStore" name="itemStore">
+        <!-- Options will be populated dynamically based on the selection -->
+      </select>
+    </fieldset>
+
+    <fieldset>
+      <legend>Your Character's Total Value</legend>
+      <label for="totalValue">Total Value:</label>
+      <input type="number" id="totalValue" name="totalValue" min="0">
+    </fieldset>
+
+    <fieldset>
+      <legend>Simulation Mode</legend>
+      <label for="interactiveMode">Interactive Mode: Stack drink stats and each food used in a progress bar! </label>
+      <input type="checkbox" id="interactiveMode" name="interactiveMode">
+      <div id="progressContainer"></div>
+    </fieldset>
+
+    <button type="button" id="calculateButton">Calculate</button>
+  </form>
+
+
+  <div id="resultContainer">
+    <h2>Result:</h2>
+    <div>
+      <label for="itemResultField">Result:</label>
+      <input type="text" id="itemResultField" role="status" readonly>
+    </div>
+  </div>
+</div>
+
+<script>
+
+function updateSimulatorVisibility() {
+  const useItemSimulator = document.getElementById('useItemSimulator').checked;
+  const useEquipmentSimulator = document.getElementById('useEquipmentSimulator').checked;
+  const useGemSimulator = document.getElementById('useGemSimulator').checked;
+
+  const foodSimulatorContainer = document.getElementById('foodSimulatorContainer');
+  const EQSimulatorContainer = document.getElementById('EQSimulatorContainer');
+  const gemSimulatorContainer = document.getElementById('gemSimulatorContainer');
+
+  if (useItemSimulator) {
+    foodSimulatorContainer.classList.remove('hidden');
+    EQSimulatorContainer.classList.add('hidden');
+    gemSimulatorContainer.classList.add('hidden');
+  } else if (useEquipmentSimulator) {
+    foodSimulatorContainer.classList.add('hidden');
+    EQSimulatorContainer.classList.remove('hidden');
+    gemSimulatorContainer.classList.add('hidden');
+  } else if (useGemSimulator) {
+    foodSimulatorContainer.classList.add('hidden');
+    EQSimulatorContainer.classList.add('hidden');
+    gemSimulatorContainer.classList.remove('hidden');
+  }
+}
+
+// Event listeners for radio button changes
+document.getElementById('useEquipmentSimulator').addEventListener('change', updateSimulatorVisibility);
+document.getElementById('useGemSimulator').addEventListener('change', updateSimulatorVisibility);
+document.getElementById('useItemSimulator').addEventListener('change', updateSimulatorVisibility);
+
+// Initial update of visibility based on selected radio button
+updateSimulatorVisibility();
+</script>
+    <script src="equipment-simulator.js"></script>
+    <script src="gem-simulator.js"></script>
+    <script src="food-simulator.js"></script>
+</body>
+</html>
