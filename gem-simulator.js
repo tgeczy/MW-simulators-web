@@ -8,11 +8,29 @@ function calculateNumShards(arnebiaAmount, arnebiaPrice) {
     return arnebiaPrice > 0 ? Math.floor(arnebiaAmount / arnebiaPrice) : 0;
 }
 
+<<<<<<< HEAD
+let gemPaused = false;
+let gemRunning = false;
+
+const gemPauseButton = document.getElementById('pauseGemEnhance');
+const gemStartButton = document.getElementById('startGemEnhance');
+
+function updateGemStatus(message) {
+    const resultField = document.getElementById('gemResultField');
+    resultField.value = message;
+}
+
+=======
+>>>>>>> origin/main
 function appendGemLog(message) {
     const log = document.getElementById('gemSimulationLog');
     const entry = document.createElement('div');
     entry.textContent = message;
     log.appendChild(entry);
+<<<<<<< HEAD
+    updateGemStatus(message);
+=======
+>>>>>>> origin/main
 }
 
 function resetGemLog(showProgress) {
@@ -21,6 +39,27 @@ function resetGemLog(showProgress) {
     log.innerHTML = '';
     progress.value = 0;
     progress.classList.toggle('hidden', !showProgress);
+<<<<<<< HEAD
+    updateGemStatus('');
+}
+
+async function waitForGemResume() {
+    while (gemPaused) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+}
+
+async function sleepWithGemPause(durationMs) {
+    const step = 50;
+    let elapsed = 0;
+    while (elapsed < durationMs) {
+        await waitForGemResume();
+        const delay = Math.min(step, durationMs - elapsed);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        elapsed += delay;
+    }
+=======
+>>>>>>> origin/main
 }
 
 // Calculate gem levels from the number of shards
@@ -57,6 +96,10 @@ async function calculateGemLevels(numShards, useExtraShard, ProtLevel, arnebiaPr
             usedShardCounter += shardsPerGemLevel[currentLevel] * 3;
             const attemptNumber = usedShardCounter / shardsPerGemLevel[1];
             if (interactive) {
+<<<<<<< HEAD
+                await waitForGemResume();
+=======
+>>>>>>> origin/main
                 appendGemLog(`Combining 3x Level ${currentLevel} (Attempt ${attemptNumber.toFixed(0)})...`);
             }
 
@@ -85,7 +128,11 @@ async function calculateGemLevels(numShards, useExtraShard, ProtLevel, arnebiaPr
             }
 
             if (delay) {
+<<<<<<< HEAD
+                await sleepWithGemPause(delay);
+=======
                 await new Promise(resolve => setTimeout(resolve, delay));
+>>>>>>> origin/main
             }
         }
     }
@@ -147,7 +194,20 @@ document.getElementById('calcByArnebia').addEventListener('change', function() {
 });
 
 // Main function to handle gem enhancement process
+<<<<<<< HEAD
+gemPauseButton.addEventListener('click', () => {
+    if (!gemRunning) {
+        return;
+    }
+    gemPaused = !gemPaused;
+    gemPauseButton.textContent = gemPaused ? 'Resume simulation' : 'Pause simulation';
+    updateGemStatus(gemPaused ? 'Gem simulation paused.' : 'Gem simulation resumed.');
+});
+
+gemStartButton.addEventListener('click', async function() {
+=======
 document.getElementById('startGemEnhance').addEventListener('click', async function() {
+>>>>>>> origin/main
     const gemTypeElement = document.getElementById("gemType");
     const gemTypeName = gemTypeElement.options[gemTypeElement.selectedIndex].text;
     const calcByLevel = document.getElementById('calcByLevel').checked;
@@ -168,6 +228,14 @@ document.getElementById('startGemEnhance').addEventListener('click', async funct
         return;
     }
 
+<<<<<<< HEAD
+    if (gemRunning) {
+        appendGemLog('A gem simulation is already running. Please wait or pause it first.');
+        return;
+    }
+
+=======
+>>>>>>> origin/main
     let numShards = 0;
     if (calcByArnebia) {
         const arnebiaAmount = parseInt(document.getElementById('arnebiaAmount').value);
@@ -184,10 +252,29 @@ document.getElementById('startGemEnhance').addEventListener('click', async funct
         }
     }
 
+<<<<<<< HEAD
+    gemPaused = false;
+    gemRunning = true;
+    gemStartButton.disabled = true;
+    gemPauseButton.disabled = !interactiveGemSimulation;
+    gemPauseButton.textContent = 'Pause simulation';
+    if (interactiveGemSimulation) {
+        updateGemStatus('Starting interactive gem simulation...');
+    }
+
+=======
+>>>>>>> origin/main
     if (calcByLevel) {
         const targetGemLevel = parseInt(document.getElementById('targetGemLevel').value);
         if (isNaN(targetGemLevel) || targetGemLevel <= 0 || targetGemLevel > 9) {
             alert("Please enter a valid target gem level between 1 and 9.");
+<<<<<<< HEAD
+            gemRunning = false;
+            gemPaused = false;
+            gemStartButton.disabled = false;
+            gemPauseButton.disabled = true;
+=======
+>>>>>>> origin/main
             return;
         }
         const totalShardsRequired = calculateTargetGemLevel(numShards, targetGemLevel, useExtraShard);
@@ -223,5 +310,14 @@ document.getElementById('startGemEnhance').addEventListener('click', async funct
     }
 
     // Display the result
+<<<<<<< HEAD
+    updateGemStatus(resultMessage);
+    gemRunning = false;
+    gemPaused = false;
+    gemStartButton.disabled = false;
+    gemPauseButton.disabled = true;
+    gemPauseButton.textContent = 'Pause simulation';
+=======
     document.getElementById('gemResultField').value = resultMessage;
+>>>>>>> origin/main
 });
