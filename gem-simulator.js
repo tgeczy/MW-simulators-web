@@ -10,11 +10,31 @@ function calculateNumShards(arnebiaAmount, arnebiaPrice) {
 
 let gemPaused = false;
 let gemRunning = false;
+let gemSoundMode = false;
 
 const gemPauseButton = document.getElementById('pauseGemEnhance');
 const gemStartButton = document.getElementById('startGemEnhance');
 const gemTypeElement = document.getElementById('gemType');
 const gemServerSelector = document.getElementById('gemServer');
+const interactiveGemCheckbox = document.getElementById('interactiveGemSimulation');
+const gemSoundContainer = document.getElementById('gemSoundContainer');
+const useGemSoundsCheckbox = document.getElementById('useGemSounds');
+
+const gemSounds = {
+    success: new Audio('sounds/success_gem.wav'),
+    fail: new Audio('sounds/failed_gem.wav')
+};
+
+function toggleGemSoundOption() {
+    const showSoundOption = interactiveGemCheckbox.checked;
+    gemSoundContainer.classList.toggle('hidden', !showSoundOption);
+    if (!showSoundOption) {
+        useGemSoundsCheckbox.checked = false;
+    }
+}
+
+interactiveGemCheckbox.addEventListener('change', toggleGemSoundOption);
+toggleGemSoundOption();
 
 const gemPriceData = [
     { value: 'ruby', label: 'Ruby', prices: { server1: 2085, server2: 1985 } },
@@ -62,7 +82,17 @@ function updateGemStatus(message) {
     resultField.value = message;
 }
 
-function appendGemLog(message) {
+function appendGemLog(message, { soundKey = null, skipTextWhenSound = false } = {}) {
+    if (gemSoundMode && soundKey) {
+        const sound = gemSounds[soundKey];
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play();
+        }
+    }
+    if (gemSoundMode && skipTextWhenSound) {
+        return;
+    }
     const log = document.getElementById('gemSimulationLog');
     const entry = document.createElement('div');
     entry.textContent = message;
@@ -131,14 +161,14 @@ async function calculateGemLevels(numShards, useExtraShard, ProtLevel, arnebiaPr
             const attemptNumber = usedShardCounter / shardsPerGemLevel[1];
             if (interactive) {
                 await waitForGemResume();
-                appendGemLog(`Combining 3x Level ${currentLevel} (Attempt ${attemptNumber.toFixed(0)})...`);
+                appendGemLog(`Combining 3x Level ${currentLevel} (Attempt ${attemptNumber.toFixed(0)})...`, { skipTextWhenSound: true });
             }
 
             if (isSuccess(successRate)) {
                 gemLevels[currentLevel] -= 3;
                 gemLevels[currentLevel + 1] += 1;
                 if (interactive) {
-                    appendGemLog(`Success! Created Level ${currentLevel + 1}.`);
+                    appendGemLog(`Success! Created Level ${currentLevel + 1}.`, { soundKey: 'success', skipTextWhenSound: true });
                 }
                 if (useExtraShard && leftoverShardsByLevel[currentLevel] > 0 && !isProtected) {
                     leftoverShardsByLevel[currentLevel]--; // Decrementing an extra shard if used
@@ -148,7 +178,7 @@ async function calculateGemLevels(numShards, useExtraShard, ProtLevel, arnebiaPr
                     leftoverShardsByLevel[currentLevel]++; // Incrementing leftover shards if the gem shatters
                     gemLevels[currentLevel]--; // Decrementing a gem as it shatters
                     if (interactive) {
-                        appendGemLog(`Fail! Lost one Level ${currentLevel} gem, gained 1 shard.`);
+                        appendGemLog(`Fail! Lost one Level ${currentLevel} gem, gained 1 shard.`, { soundKey: 'fail', skipTextWhenSound: true });
                     }
                 }
                 runesUsed += isProtected ? 1 : 0;
@@ -242,7 +272,8 @@ gemStartButton.addEventListener('click', async function() {
     const calcByShards = document.getElementById('calcByShards').checked;
     const calcByArnebia = document.getElementById('calcByArnebia').checked;
     const useExtraShard = document.getElementById('useExtraShard').checked;
-    const interactiveGemSimulation = document.getElementById('interactiveGemSimulation').checked;
+    const interactiveGemSimulation = interactiveGemCheckbox.checked;
+    gemSoundMode = interactiveGemSimulation && useGemSoundsCheckbox.checked;
     const gemProgress = document.getElementById('gemProgress');
     resetGemLog(interactiveGemSimulation);
 

@@ -37,16 +37,46 @@ toggleRuneMinLevelContainer('runMultipleSimulations', 'numSimulationsContainer')
 
 let equipmentPaused = false;
 let equipmentRunning = false;
+let equipmentSoundMode = false;
 
 const equipmentPauseButton = document.getElementById('pauseEnhance');
 const equipmentStartButton = document.getElementById('startEnhance');
+const interactiveEnhancementCheckbox = document.getElementById('interactiveEnhancement');
+const equipmentSoundContainer = document.getElementById('equipmentSoundContainer');
+const useEquipmentSoundsCheckbox = document.getElementById('useEquipmentSounds');
+
+const equipmentSounds = {
+    success: new Audio('sounds/success_enhance.wav'),
+    fail: new Audio('sounds/failed_equipment.wav')
+};
+
+function toggleEquipmentSoundOption() {
+    const showSoundOption = interactiveEnhancementCheckbox.checked;
+    equipmentSoundContainer.classList.toggle('hidden', !showSoundOption);
+    if (!showSoundOption) {
+        useEquipmentSoundsCheckbox.checked = false;
+    }
+}
+
+interactiveEnhancementCheckbox.addEventListener('change', toggleEquipmentSoundOption);
+toggleEquipmentSoundOption();
 
 function updateEquipmentStatus(message) {
     const resultField = document.getElementById('resultField');
     resultField.value = message;
 }
 
-function appendEquipmentLog(message) {
+function appendEquipmentLog(message, { soundKey = null, skipTextWhenSound = false } = {}) {
+    if (equipmentSoundMode && soundKey) {
+        const sound = equipmentSounds[soundKey];
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play();
+        }
+    }
+    if (equipmentSoundMode && skipTextWhenSound) {
+        return;
+    }
     const equipmentLog = document.getElementById('equipmentSimulationLog');
     const entry = document.createElement('div');
     entry.textContent = message;
@@ -98,7 +128,8 @@ equipmentStartButton.addEventListener('click', async () => {
     const equipmentLevel = parseInt(selectedEquipmentLevelText.split(' ')[1]);
     const boostRuneMinLevel = boostRune ? parseInt(document.getElementById('boostRuneMinLevel').value) : Number.MAX_SAFE_INTEGER;
     const protectRuneMinLevel = protectRune ? parseInt(document.getElementById('protectRuneMinLevel').value) : Number.MAX_SAFE_INTEGER;
-    const interactiveEnhancement = document.getElementById('interactiveEnhancement').checked;
+    const interactiveEnhancement = interactiveEnhancementCheckbox.checked;
+    equipmentSoundMode = interactiveEnhancement && useEquipmentSoundsCheckbox.checked;
 
     if (targetEnhancement <= currentEnhancement) {
         alert('Target enhancement level should be higher than the current enhancement level.');
@@ -179,7 +210,7 @@ equipmentStartButton.addEventListener('click', async () => {
             const enhanceSuccess = enhanceGar >= enhancementGuarantees[enhancementLevel - 1] || Math.random() * 100 < successRate;
             await waitForEquipmentResume();
             if (interactiveEnhancement) {
-                appendEquipmentLog(`Attempt ${attempts}: L${enhancementLevel} -> ${enhancementLevel + 1} (${enhanceGar}/${enhancementGuarantees[enhancementLevel - 1]} guarantee).`);
+                appendEquipmentLog(`Attempt ${attempts}: L${enhancementLevel} -> ${enhancementLevel + 1} (${enhanceGar}/${enhancementGuarantees[enhancementLevel - 1]} guarantee).`, { skipTextWhenSound: true });
             }
 
             if (enhanceSuccess) {
@@ -188,13 +219,13 @@ equipmentStartButton.addEventListener('click', async () => {
                 enhancementLevel++;
                 enhanceGar = 0; // Reset enhanceGar whenever the enhancement level changes
                 if (interactiveEnhancement) {
-                    appendEquipmentLog(`Success! Current level: ${enhancementLevel}.`);
+                    appendEquipmentLog(`Success! Current level: ${enhancementLevel}.`, { soundKey: 'success', skipTextWhenSound: true });
                     equipmentProgress.value = Math.max(0, enhancementLevel - currentEnhancement);
                 }
             } else if (!applyProtectRune) {
                 enhancementLevel = Math.max(enhancementLevel - 1, 2);
                 if (interactiveEnhancement) {
-                    appendEquipmentLog(`Failed! Dropped to ${enhancementLevel}.`);
+                    appendEquipmentLog(`Failed! Dropped to ${enhancementLevel}.`, { soundKey: 'fail', skipTextWhenSound: true });
                 }
             } else if (enhancementLevel === 2) {
                 if (hasReachedLevelTwoTwice) {
@@ -202,7 +233,7 @@ equipmentStartButton.addEventListener('click', async () => {
                 }
                 hasReachedLevelTwoTwice = true;
                 if (interactiveEnhancement) {
-                    appendEquipmentLog('Failed at level 2 with protect rune active, stopping simulation.');
+                    appendEquipmentLog('Failed at level 2 with protect rune active, stopping simulation.', { soundKey: 'fail' });
                 }
             }
 
