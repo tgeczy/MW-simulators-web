@@ -11,6 +11,7 @@ function calculateNumShards(arnebiaAmount, arnebiaPrice) {
 let gemPaused = false;
 let gemRunning = false;
 let gemSoundMode = false;
+let usedShardCounter = 0;
 
 const gemPauseButton = document.getElementById('pauseGemEnhance');
 const gemStartButton = document.getElementById('startGemEnhance');
@@ -146,6 +147,7 @@ async function calculateGemLevels(numShards, useExtraShard, ProtLevel, arnebiaPr
     let totalShardsUsed = 0;
     let runesUsed = 0;
     const shardsPerGemLevel = buildShardsPerGemLevel();
+    usedShardCounter = 0;
 
     gemLevels[1] = Math.floor(numShards / 4);
     leftoverShardsByLevel[1] = numShards % 4;
@@ -214,11 +216,22 @@ async function calculateGemLevels(numShards, useExtraShard, ProtLevel, arnebiaPr
 }
 
 // Calculate gem upgrades starting from multiple gem levels instead of shards
-function calculateFromMultipleGems(gemEntries, useExtraShard, ProtLevel, arnebiaPrice) {
+async function calculateFromMultipleGems(
+    gemEntries,
+    useExtraShard,
+    ProtLevel,
+    arnebiaPrice,
+    interactiveOptions = {}
+) {
+    const { interactive = false, progressBar = null } = interactiveOptions;
     const gemLevels = new Array(10).fill(0);
     const leftoverShardsByLevel = new Array(10).fill(0);
     const shardsPerGemLevel = buildShardsPerGemLevel();
     let runesUsed = 0;
+    let localShardCounter = 0;
+    const delay = interactive ? 350 : 0;
+
+    usedShardCounter = 0;
 
     gemEntries.forEach(({ level, count }) => {
         const normalizedLevel = Math.max(1, Math.min(9, parseInt(level, 10)));
@@ -230,6 +243,11 @@ function calculateFromMultipleGems(gemEntries, useExtraShard, ProtLevel, arnebia
         return total + (count * (shardsPerGemLevel[level] || 0));
     }, 0);
 
+    if (progressBar) {
+        progressBar.max = Math.max(totalStartingShards, 1);
+        progressBar.value = 0;
+    }
+
     for (let currentLevel = 1; currentLevel < 9; currentLevel++) {
         while (gemLevels[currentLevel] >= 3) {
             let successRate = 0.50; // Default success rate
@@ -238,9 +256,26 @@ function calculateFromMultipleGems(gemEntries, useExtraShard, ProtLevel, arnebia
                 successRate = 0.70; // Increased success rate when using an extra shard
             }
 
+            localShardCounter += shardsPerGemLevel[currentLevel] * 3;
+            usedShardCounter = localShardCounter;
+
+            if (interactive) {
+                await waitForGemResume();
+                appendGemLog(
+                    `Combining 3x Level ${currentLevel} gems...`,
+                    { skipTextWhenSound: true }
+                );
+            }
+
             if (isSuccess(successRate)) {
                 gemLevels[currentLevel] -= 3;
                 gemLevels[currentLevel + 1] += 1;
+                if (interactive) {
+                    appendGemLog(
+                        `Success! Created Level ${currentLevel + 1}.`,
+                        { soundKey: 'success', skipTextWhenSound: true }
+                    );
+                }
                 if (useExtraShard && leftoverShardsByLevel[currentLevel] > 0 && !isProtected) {
                     leftoverShardsByLevel[currentLevel]--; // Decrementing an extra shard if used
                 }
@@ -248,8 +283,22 @@ function calculateFromMultipleGems(gemEntries, useExtraShard, ProtLevel, arnebia
                 if (!isProtected) {
                     leftoverShardsByLevel[currentLevel]++;
                     gemLevels[currentLevel]--;
+                    if (interactive) {
+                        appendGemLog(
+                            `Fail! Lost one Level ${currentLevel} gem, gained 1 shard.`,
+                            { soundKey: 'fail', skipTextWhenSound: true }
+                        );
+                    }
                 }
                 runesUsed += isProtected ? 1 : 0;
+            }
+
+            if (progressBar) {
+                progressBar.value = Math.min(progressBar.max, localShardCounter);
+            }
+
+            if (delay) {
+                await sleepWithGemPause(delay);
             }
         }
     }
