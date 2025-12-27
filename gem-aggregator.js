@@ -27,8 +27,8 @@
         countTd.appendChild(countInput);
 
         const removeTd = document.createElement('td');
-        const removeBtn = document.createElement('span');
-        removeBtn.textContent = 'X';
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remove';
         removeBtn.classList.add('removeRowBtn');
         removeBtn.addEventListener('click', () => {
             gemTableBody.removeChild(newRow);
