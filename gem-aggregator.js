@@ -56,9 +56,14 @@
     addGemRow();
 
     // Intercept the "Start Gem Enhance" for aggregator mode
-    startGemEnhanceBtn.addEventListener('click', () => {
+    startGemEnhanceBtn.addEventListener('click', async () => {
         // If aggregator mode isn't active, do nothing special (gem-simulator.js will handle it).
         if (!calcByMultiGemsRadio.checked) {
+            return;
+        }
+
+        if (gemRunning) {
+            appendGemLog('A gem simulation is already running. Please wait or pause it first.');
             return;
         }
 
@@ -109,46 +114,78 @@
             return;
         }
 
-        // Use the function from gem-simulator.js
-        const resultData = calculateFromMultipleGems(
-            gemLevelsArray,
-            useExtraShard,
-            ProtLevelVal,
-            arnebiaPrice
-        );
+        const interactiveGemSimulation = document.getElementById('interactiveGemSimulation').checked;
+        const gemProgress = document.getElementById('gemProgress');
+        const useGemSoundsCheckbox = document.getElementById('useGemSounds');
+        const gemPauseButton = document.getElementById('pauseGemEnhance');
 
-        // Build a result message
-        let message = `Starting with multiple gem levels for ${gemTypeName}, we got: `;
+        gemSoundMode = interactiveGemSimulation && useGemSoundsCheckbox.checked;
+        resetGemLog(interactiveGemSimulation);
 
-        let anyGems = false;
-        for (let lvl = 1; lvl < resultData.gemLevels.length; lvl++) {
-            if (resultData.gemLevels[lvl] > 0) {
-                anyGems = true;
-                message += `Level ${lvl}: ${resultData.gemLevels[lvl]}, `;
-            }
-        }
-        if (!anyGems) {
-            message += ` no upgraded gems, `;
-        }
-        message = message.replace(/,\s*$/, '');
-        message += `. We have ${resultData.leftoverShards} leftover shards. `;
+        gemPaused = false;
+        gemRunning = true;
+        startGemEnhanceBtn.disabled = true;
+        gemPauseButton.disabled = !interactiveGemSimulation;
+        gemPauseButton.textContent = 'Pause simulation';
 
-        if (resultData.leftoverShards > 0) {
-            message += "Leftover shards by level: ";
-            resultData.leftoverShardsByLevel.forEach((shCount, idx) => {
-                if (idx > 0 && shCount > 0) {
-                    message += `L${idx}: ${shCount}, `;
+        let resultData;
+        try {
+            // Use the function from gem-simulator.js
+            resultData = await calculateFromMultipleGems(
+                gemLevelsArray,
+                useExtraShard,
+                ProtLevelVal,
+                arnebiaPrice,
+                {
+                    interactive: interactiveGemSimulation,
+                    progressBar: gemProgress
                 }
-            });
-            message = message.replace(/,\s*$/, '');
+            );
+        } catch (error) {
+            appendGemLog(`Gem aggregation failed: ${error.message || error}`);
+            resultData = null;
         }
 
-        // Runes used
-        message += `. Runes used: ${resultData.runesUsed}`;
+        if (resultData) {
+            // Build a result message
+            let message = `Starting with multiple gem levels for ${gemTypeName}, we got: `;
 
-        // Because we didn't start from shards, totalArnebiaCost is 0
-        // but if you want to reflect some cost, you'd handle that logic differently.
+            let anyGems = false;
+            for (let lvl = 1; lvl < resultData.gemLevels.length; lvl++) {
+                if (resultData.gemLevels[lvl] > 0) {
+                    anyGems = true;
+                    message += `Level ${lvl}: ${resultData.gemLevels[lvl]}, `;
+                }
+            }
+            if (!anyGems) {
+                message += ` no upgraded gems, `;
+            }
+            message = message.replace(/,\s*$/, '');
+            message += `. We have ${resultData.leftoverShards} leftover shards. `;
 
-        updateGemStatus(message);
+            if (resultData.leftoverShards > 0) {
+                message += "Leftover shards by level: ";
+                resultData.leftoverShardsByLevel.forEach((shCount, idx) => {
+                    if (idx > 0 && shCount > 0) {
+                        message += `L${idx}: ${shCount}, `;
+                    }
+                });
+                message = message.replace(/,\s*$/, '');
+            }
+
+            // Runes used
+            message += `. Runes used: ${resultData.runesUsed}`;
+
+            // Because we didn't start from shards, totalArnebiaCost is 0
+            // but if you want to reflect some cost, you'd handle that logic differently.
+
+            updateGemStatus(message);
+        }
+
+        gemRunning = false;
+        gemPaused = false;
+        startGemEnhanceBtn.disabled = false;
+        gemPauseButton.disabled = true;
+        gemPauseButton.textContent = 'Pause simulation';
     });
 })();
