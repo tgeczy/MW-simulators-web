@@ -93,6 +93,13 @@
         <label for="numSimulations">Number of simulations:</label>
         <input type="number" id="numSimulations" min="1" value="1000">
     </div>
+    <fieldset>
+      <legend>Interactive Simulation</legend>
+      <label for="interactiveEnhancement">Show each attempt with time passing:</label>
+      <input type="checkbox" id="interactiveEnhancement">
+      <progress id="equipmentProgress" class="progress-bar hidden" max="1" value="0"></progress>
+      <div id="equipmentSimulationLog"></div>
+    </fieldset>
     <br><br>
 
     <button type="button" id="startEnhance">Start Enhance</button>
@@ -177,6 +184,13 @@ However, in the game, counting by shards or arnebia is more of the dynamic - the
     <!-- Checkbox for using an extra shard when possible -->
     <label for="useExtraShard">Use extra shard when possible:</label>
     <input type="checkbox" id="useExtraShard">
+    <fieldset>
+      <legend>Interactive Simulation</legend>
+      <label for="interactiveGemSimulation">Show each combine attempt with time passing:</label>
+      <input type="checkbox" id="interactiveGemSimulation">
+      <progress id="gemProgress" class="progress-bar hidden" max="1" value="0"></progress>
+      <div id="gemSimulationLog"></div>
+    </fieldset>
     <!-- Button to start calculation -->
     <button type="button" id="startGemEnhance">Start Gem Enhance</button>
 
