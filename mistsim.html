@@ -93,6 +93,14 @@
         <label for="numSimulations">Number of simulations:</label>
         <input type="number" id="numSimulations" min="1" value="1000">
     </div>
+    <fieldset>
+      <legend>Interactive Simulation</legend>
+      <label for="interactiveEnhancement">Show each attempt with time passing:</label>
+      <input type="checkbox" id="interactiveEnhancement">
+      <progress id="equipmentProgress" class="progress-bar hidden" max="1" value="0"></progress>
+      <button type="button" id="pauseEnhance" disabled>Pause simulation</button>
+      <div id="equipmentSimulationLog" role="log" aria-live="polite" aria-atomic="false"></div>
+    </fieldset>
     <br><br>
 
     <button type="button" id="startEnhance">Start Enhance</button>
@@ -101,7 +109,7 @@
 <br>
 
 <label for="resultField">Result:</label>
-<input type="text" id="resultField" role="status" readonly>
+<input type="text" id="resultField" role="status" aria-live="polite" readonly>
 </div>
 <div id="gemSimulatorContainer" class="hidden">
     <h3>Gem Enhancement Simulator</h3>
@@ -177,12 +185,20 @@ However, in the game, counting by shards or arnebia is more of the dynamic - the
     <!-- Checkbox for using an extra shard when possible -->
     <label for="useExtraShard">Use extra shard when possible:</label>
     <input type="checkbox" id="useExtraShard">
+    <fieldset>
+      <legend>Interactive Simulation</legend>
+      <label for="interactiveGemSimulation">Show each combine attempt with time passing:</label>
+      <input type="checkbox" id="interactiveGemSimulation">
+      <progress id="gemProgress" class="progress-bar hidden" max="1" value="0"></progress>
+      <button type="button" id="pauseGemEnhance" disabled>Pause simulation</button>
+      <div id="gemSimulationLog" role="log" aria-live="polite" aria-atomic="false"></div>
+    </fieldset>
     <!-- Button to start calculation -->
     <button type="button" id="startGemEnhance">Start Gem Enhance</button>
 
     <!-- Output field for the result -->
     <label for="gemResultField">Result:</label>
-    <input type="text" id="gemResultField" role="status" readonly>
+    <input type="text" id="gemResultField" role="status" aria-live="polite" readonly>
 </div>
 
 <!-- Food & Drink Simulator -->
