@@ -153,7 +153,7 @@ equipmentStartButton.addEventListener('click', async () => {
 
     //main part of the program
     const shardsPerCrystal = [2, 4, 10, 20, 40, 70, 120, 200];
-    const runesPerEquipmentLevel = [1, 2, 4, 7, 11, 15, 21, 24];
+    const runesPerEquipmentLevel = [1, 2, 4, 7, 11, 15, 21, 25];
     const runeMultiplier = runesPerEquipmentLevel[equipmentLevelIndex];  // Define runeMultiplier here
     let totalGarLevels = 0; // Initialize totalGarLevels before the for loop
     let garLevels = Array(targetEnhancement - currentEnhancement).fill(0);
