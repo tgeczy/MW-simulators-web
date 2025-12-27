@@ -129,7 +129,7 @@ However, in the game, counting by shards or arnebia is more of the dynamic - the
 
 
     <!-- Radio buttons to choose calculation mode -->
-        <fieldset>
+    <fieldset>
             <legend>Calculation Mode Selection</legend>
     <input type="radio" id="calcByLevel" name="calcMode" value="level" checked>
     <label for="calcByLevel">Calculate by target gem level</label><br>
@@ -138,6 +138,8 @@ However, in the game, counting by shards or arnebia is more of the dynamic - the
         <label for="calcByArnebia">
   <input type="radio" name="calcMode" id="calcByArnebia" /> Calculate by amount of Arnebia
 </label>
+            <input type="radio" id="calcByMultiGems" name="calcMode" value="multiGems">
+            <label for="calcByMultiGems">Calculate by multiple gem levels (aggregator)</label>
         </fieldset>
 <div id="arnebiaContainer" class="hidden">
   <label for="arnebiaAmount">Arnebia:</label>
@@ -179,6 +181,25 @@ However, in the game, counting by shards or arnebia is more of the dynamic - the
     <!-- Checkbox for using an extra shard when possible -->
     <label for="useExtraShard">Use extra shard when possible:</label>
     <input type="checkbox" id="useExtraShard">
+    <!-- NEW: multiple gem aggregator container -->
+    <div id="multipleGemInventoryContainer" class="hidden">
+        <p>Enter multiple gem levels with counts below. One gem type is chosen for all these gem levels:</p>
+        <button type="button" id="addGemRowBtn">Add Another Gem Row</button>
+
+        <table aria-label="Gem aggregator table" id="gemTable">
+            <caption>Multiple gem level entries</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Gem Level (1–9)</th>
+                    <th scope="col">Number of Gems</th>
+                    <th scope="col">Remove Row</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows get added here dynamically -->
+            </tbody>
+        </table>
+    </div>
     <fieldset>
       <legend>Interactive Simulation</legend>
       <label for="interactiveGemSimulation">Show each combine attempt with time passing:</label>
@@ -283,6 +304,7 @@ updateSimulatorVisibility();
 </script>
     <script src="equipment-simulator.js"></script>
     <script src="gem-simulator.js"></script>
+    <script src="gem-aggregator.js"></script>
     <script src="food-simulator.js"></script>
 </body>
 </html>

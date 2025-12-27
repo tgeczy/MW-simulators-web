@@ -6,7 +6,6 @@
     const gemTableBody = document.querySelector('#gemTable tbody');
     const addGemRowBtn = document.getElementById('addGemRowBtn');
     const startGemEnhanceBtn = document.getElementById('startGemEnhance');
-    const gemResultField = document.getElementById('gemResultField');
 
     // Add a fresh row for entering gem level & count
     function addGemRow() {
@@ -105,6 +104,11 @@
             ? 0
             : parseInt(gemTypeElement.selectedOptions[0].dataset.price);
 
+        if (selectedGemType === 'none') {
+            alert("Please select a valid gem type.");
+            return;
+        }
+
         // Use the function from gem-simulator.js
         const resultData = calculateFromMultipleGems(
             gemLevelsArray,
@@ -145,6 +149,6 @@
         // Because we didn't start from shards, totalArnebiaCost is 0
         // but if you want to reflect some cost, you'd handle that logic differently.
 
-        gemResultField.textContent = message;
+        updateGemStatus(message);
     });
 })();
