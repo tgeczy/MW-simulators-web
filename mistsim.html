@@ -97,6 +97,10 @@
       <legend>Interactive Simulation</legend>
       <label for="interactiveEnhancement">Show each attempt with time passing:</label>
       <input type="checkbox" id="interactiveEnhancement">
+      <div id="equipmentSoundContainer" class="hidden">
+        <label for="useEquipmentSounds">Use sounds instead of text to indicate enhancement:</label>
+        <input type="checkbox" id="useEquipmentSounds">
+      </div>
       <progress id="equipmentProgress" class="progress-bar hidden" max="1" value="0"></progress>
       <button type="button" id="pauseEnhance" disabled>Pause simulation</button>
       <div id="equipmentSimulationLog" role="log" aria-live="polite" aria-atomic="false"></div>
@@ -179,6 +183,10 @@ However, in the game, counting by shards or arnebia is more of the dynamic - the
       <legend>Interactive Simulation</legend>
       <label for="interactiveGemSimulation">Show each combine attempt with time passing:</label>
       <input type="checkbox" id="interactiveGemSimulation">
+      <div id="gemSoundContainer" class="hidden">
+        <label for="useGemSounds">Use sounds instead of text to indicate enhancement:</label>
+        <input type="checkbox" id="useGemSounds">
+      </div>
       <progress id="gemProgress" class="progress-bar hidden" max="1" value="0"></progress>
       <button type="button" id="pauseGemEnhance" disabled>Pause simulation</button>
       <div id="gemSimulationLog" role="log" aria-live="polite" aria-atomic="false"></div>
