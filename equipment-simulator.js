@@ -35,7 +35,6 @@ toggleRuneMinLevelContainer('boostRune', 'boostRuneMinLevelContainer');
 toggleRuneMinLevelContainer('protectRune', 'protectRuneMinLevelContainer');
 toggleRuneMinLevelContainer('runMultipleSimulations', 'numSimulationsContainer');
 
-<<<<<<< HEAD
 let equipmentPaused = false;
 let equipmentRunning = false;
 
@@ -47,17 +46,12 @@ function updateEquipmentStatus(message) {
     resultField.value = message;
 }
 
-=======
->>>>>>> origin/main
 function appendEquipmentLog(message) {
     const equipmentLog = document.getElementById('equipmentSimulationLog');
     const entry = document.createElement('div');
     entry.textContent = message;
     equipmentLog.appendChild(entry);
-<<<<<<< HEAD
     updateEquipmentStatus(message);
-=======
->>>>>>> origin/main
 }
 
 function resetEquipmentLog(showProgress) {
@@ -66,7 +60,6 @@ function resetEquipmentLog(showProgress) {
     equipmentLog.innerHTML = '';
     equipmentProgress.value = 0;
     equipmentProgress.classList.toggle('hidden', !showProgress);
-<<<<<<< HEAD
     updateEquipmentStatus('');
 }
 
@@ -97,11 +90,6 @@ equipmentPauseButton.addEventListener('click', () => {
 });
 
 equipmentStartButton.addEventListener('click', async () => {
-=======
-}
-
-document.getElementById('startEnhance').addEventListener('click', async () => {
->>>>>>> origin/main
     const currentEnhancement = parseInt(document.getElementById('currentEnhancement').value);
     const targetEnhancement = parseInt(document.getElementById('targetEnhancement').value);
     const boostRune = document.getElementById('boostRune').checked;
@@ -117,20 +105,16 @@ document.getElementById('startEnhance').addEventListener('click', async () => {
         return;
     }
 
-<<<<<<< HEAD
     if (equipmentRunning) {
         appendEquipmentLog('A simulation is already running. Please wait or pause it first.');
         return;
     }
 
-=======
->>>>>>> origin/main
     const runMultipleSimulations = document.getElementById('runMultipleSimulations').checked;
     let numSimulations = runMultipleSimulations ? parseInt(document.getElementById('numSimulations').value) : 1;
     const equipmentProgress = document.getElementById('equipmentProgress');
     const requireInteractiveSingleRun = interactiveEnhancement && numSimulations > 1;
     resetEquipmentLog(interactiveEnhancement);
-<<<<<<< HEAD
     equipmentPaused = false;
     equipmentRunning = true;
     equipmentStartButton.disabled = true;
@@ -139,8 +123,7 @@ document.getElementById('startEnhance').addEventListener('click', async () => {
     if (interactiveEnhancement) {
         updateEquipmentStatus('Starting interactive equipment simulation...');
     }
-=======
->>>>>>> origin/main
+
     if (requireInteractiveSingleRun) {
         numSimulations = 1;
         appendEquipmentLog('Interactive simulation runs a single session; multi-run average disabled.');
@@ -161,13 +144,10 @@ document.getElementById('startEnhance').addEventListener('click', async () => {
     const equipmentLevelIndex = equipmentLevels.indexOf(equipmentLevel);
     if (equipmentLevelIndex === -1) {
         alert('Invalid equipment level selected.');
-<<<<<<< HEAD
         equipmentRunning = false;
         equipmentPaused = false;
         equipmentStartButton.disabled = false;
         equipmentPauseButton.disabled = true;
-=======
->>>>>>> origin/main
         return;
     }
 
@@ -197,10 +177,7 @@ document.getElementById('startEnhance').addEventListener('click', async () => {
             const applyProtectRune = protectRune && enhancementLevel >= protectRuneMinLevel;
             const successRate = successRates[enhancementLevel - 1] + (applyBoostRune ? 5 : 0);
             const enhanceSuccess = enhanceGar >= enhancementGuarantees[enhancementLevel - 1] || Math.random() * 100 < successRate;
-<<<<<<< HEAD
             await waitForEquipmentResume();
-=======
->>>>>>> origin/main
             if (interactiveEnhancement) {
                 appendEquipmentLog(`Attempt ${attempts}: L${enhancementLevel} -> ${enhancementLevel + 1} (${enhanceGar}/${enhancementGuarantees[enhancementLevel - 1]} guarantee).`);
             }
@@ -240,11 +217,7 @@ document.getElementById('startEnhance').addEventListener('click', async () => {
             }
 
             if (delay) {
-<<<<<<< HEAD
                 await sleepWithEquipmentPause(delay);
-=======
-                await new Promise(resolve => setTimeout(resolve, delay));
->>>>>>> origin/main
             }
         }
 
@@ -316,14 +289,10 @@ document.getElementById('startEnhance').addEventListener('click', async () => {
     }
 
     // Display the result message in the result field
-<<<<<<< HEAD
     updateEquipmentStatus(resultMessage);
     equipmentRunning = false;
     equipmentPaused = false;
     equipmentStartButton.disabled = false;
     equipmentPauseButton.disabled = true;
     equipmentPauseButton.textContent = 'Pause simulation';
-=======
-    document.getElementById('resultField').value = resultMessage;
->>>>>>> origin/main
 });
