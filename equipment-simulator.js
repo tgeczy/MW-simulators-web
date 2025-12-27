@@ -39,6 +39,13 @@ let equipmentPaused = false;
 let equipmentRunning = false;
 let equipmentSoundMode = false;
 
+const manualEnhanceCheckbox = document.getElementById('manualEnhance');
+const targetEnhancementContainer = document.getElementById('targetEnhancementContainer');
+const targetEnhancementSelect = document.getElementById('targetEnhancement');
+const runMultipleSimulationsCheckbox = document.getElementById('runMultipleSimulations');
+const numSimulationsContainer = document.getElementById('numSimulationsContainer');
+const currentEnhancementSelect = document.getElementById('currentEnhancement');
+
 const equipmentPauseButton = document.getElementById('pauseEnhance');
 const equipmentStartButton = document.getElementById('startEnhance');
 const interactiveEnhancementCheckbox = document.getElementById('interactiveEnhancement');
@@ -60,6 +67,32 @@ function toggleEquipmentSoundOption() {
 
 interactiveEnhancementCheckbox.addEventListener('change', toggleEquipmentSoundOption);
 toggleEquipmentSoundOption();
+
+function enforceTargetAboveCurrent() {
+    if (manualEnhanceCheckbox.checked) {
+        return;
+    }
+    const currentEnhancement = parseInt(currentEnhancementSelect.value);
+    if (parseInt(targetEnhancementSelect.value) <= currentEnhancement) {
+        targetEnhancementSelect.value = currentEnhancement + 1;
+    }
+}
+
+function toggleManualEnhance() {
+    const manualMode = manualEnhanceCheckbox.checked;
+    targetEnhancementContainer.classList.toggle('hidden', manualMode);
+    targetEnhancementSelect.disabled = manualMode;
+    runMultipleSimulationsCheckbox.disabled = manualMode;
+    if (manualMode) {
+        runMultipleSimulationsCheckbox.checked = false;
+        numSimulationsContainer.classList.add('hidden');
+    }
+    enforceTargetAboveCurrent();
+}
+
+manualEnhanceCheckbox.addEventListener('change', toggleManualEnhance);
+currentEnhancementSelect.addEventListener('change', enforceTargetAboveCurrent);
+toggleManualEnhance();
 
 function updateEquipmentStatus(message) {
     const resultField = document.getElementById('resultField');
@@ -120,8 +153,9 @@ equipmentPauseButton.addEventListener('click', () => {
 });
 
 equipmentStartButton.addEventListener('click', async () => {
-    const currentEnhancement = parseInt(document.getElementById('currentEnhancement').value);
-    const targetEnhancement = parseInt(document.getElementById('targetEnhancement').value);
+    const currentEnhancement = parseInt(currentEnhancementSelect.value);
+    const manualEnhance = manualEnhanceCheckbox.checked;
+    const targetEnhancement = manualEnhance ? currentEnhancement + 1 : parseInt(targetEnhancementSelect.value);
     const boostRune = document.getElementById('boostRune').checked;
     const protectRune = document.getElementById('protectRune').checked;
     const selectedEquipmentLevelText = document.getElementById('equipmentLevel').options[document.getElementById('equipmentLevel').selectedIndex].text;
@@ -130,6 +164,11 @@ equipmentStartButton.addEventListener('click', async () => {
     const protectRuneMinLevel = protectRune ? parseInt(document.getElementById('protectRuneMinLevel').value) : Number.MAX_SAFE_INTEGER;
     const interactiveEnhancement = interactiveEnhancementCheckbox.checked;
     equipmentSoundMode = interactiveEnhancement && useEquipmentSoundsCheckbox.checked;
+
+    if (manualEnhance && currentEnhancement >= levelLabels.length) {
+        alert('Manual enhancement is not available at the maximum enhancement level.');
+        return;
+    }
 
     if (targetEnhancement <= currentEnhancement) {
         alert('Target enhancement level should be higher than the current enhancement level.');
@@ -141,7 +180,7 @@ equipmentStartButton.addEventListener('click', async () => {
         return;
     }
 
-    const runMultipleSimulations = document.getElementById('runMultipleSimulations').checked;
+    const runMultipleSimulations = runMultipleSimulationsCheckbox.checked;
     let numSimulations = runMultipleSimulations ? parseInt(document.getElementById('numSimulations').value) : 1;
     const equipmentProgress = document.getElementById('equipmentProgress');
     const requireInteractiveSingleRun = interactiveEnhancement && numSimulations > 1;
@@ -189,6 +228,7 @@ equipmentStartButton.addEventListener('click', async () => {
     let totalGarLevels = 0; // Initialize totalGarLevels before the for loop
     let garLevels = Array(targetEnhancement - currentEnhancement).fill(0);
     let successfulEnhancements = Array(targetEnhancement - currentEnhancement).fill(0);
+    let lastEnhancementLevel = currentEnhancement;
 
     for (let sim = 0; sim < numSimulations; sim++) {
         let enhancementLevel = currentEnhancement;
@@ -251,6 +291,8 @@ equipmentStartButton.addEventListener('click', async () => {
                 await sleepWithEquipmentPause(delay);
             }
         }
+
+        lastEnhancementLevel = enhancementLevel;
 
         if (attempts === minAttempts) {
             countOfLowestAttempts++;
@@ -326,4 +368,9 @@ equipmentStartButton.addEventListener('click', async () => {
     equipmentStartButton.disabled = false;
     equipmentPauseButton.disabled = true;
     equipmentPauseButton.textContent = 'Pause simulation';
+
+    if (manualEnhance) {
+        currentEnhancementSelect.value = lastEnhancementLevel;
+        enforceTargetAboveCurrent();
+    }
 });
