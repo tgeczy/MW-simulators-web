@@ -13,6 +13,49 @@ let gemRunning = false;
 
 const gemPauseButton = document.getElementById('pauseGemEnhance');
 const gemStartButton = document.getElementById('startGemEnhance');
+const gemTypeElement = document.getElementById('gemType');
+const gemServerSelector = document.getElementById('gemServer');
+
+const gemPriceData = [
+    { value: 'ruby', label: 'Ruby', prices: { server1: 2085, server2: 1985 } },
+    { value: 'sapphire', label: 'Sapphire', prices: { server1: 20, server2: 20 } },
+    { value: 'tiger', label: 'Tiger Eye stone', prices: { server1: 2900, server2: 1890 } },
+    { value: 'opal', label: 'Opal', prices: { server1: 2735, server2: 1820 } },
+    { value: 'spinel', label: 'Spinel', prices: { server1: 20, server2: 60 } },
+    { value: 'aquamarine', label: 'Aquamarine', prices: { server1: 21, server2: 37 } },
+    { value: 'garnet', label: 'Garnet', prices: { server1: 4230, server2: 5075 } },
+    { value: 'blond', label: 'Blond jade', prices: { server1: 5705, server2: 4390 } },
+    { value: 'grape', label: 'Grape stone', prices: { server1: 21, server2: 295 } },
+    { value: 'olivine', label: 'Olivine', prices: { server1: 20, server2: 20 } },
+    { value: 'topaz', label: 'Topaz', prices: { server1: 205, server2: 66 } },
+    { value: 'obsidian', label: 'Obsidian', prices: { server1: 2785, server2: 4220 } },
+    { value: 'sunlight', label: 'Sunlight', prices: { server1: 245, server2: 96 } },
+    { value: 'moonstone', label: 'Moonstone', prices: { server1: 1880, server2: 2135 } },
+    { value: 'turquoise', label: 'Turquoise', prices: { server1: 1570, server2: 2050 } }
+];
+
+function populateGemTypes(serverKey) {
+    const previousValue = gemTypeElement.value;
+    gemTypeElement.innerHTML = '';
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = 'none';
+    defaultOption.selected = true;
+    defaultOption.textContent = 'No Gem Type';
+    gemTypeElement.appendChild(defaultOption);
+
+    gemPriceData.forEach(gem => {
+        const option = document.createElement('option');
+        option.value = gem.value;
+        option.dataset.price = gem.prices[serverKey];
+        option.textContent = `${gem.label} (Price: ${gem.prices[serverKey]})`;
+        gemTypeElement.appendChild(option);
+    });
+
+    if (gemPriceData.some(gem => gem.value === previousValue)) {
+        gemTypeElement.value = previousValue;
+    }
+}
 
 function updateGemStatus(message) {
     const resultField = document.getElementById('gemResultField');
@@ -156,6 +199,12 @@ function calculateTargetGemLevel(numShards, targetGemLevel, useExtraShard) {
 }
 
 // Event listeners for UI controls
+populateGemTypes(gemServerSelector.value);
+
+gemServerSelector.addEventListener('change', function() {
+    populateGemTypes(gemServerSelector.value);
+});
+
 document.getElementById('calcByLevel').addEventListener('change', function() {
     document.getElementById('targetGemLevelContainer').classList.remove('hidden');
     document.getElementById('numShardsContainer').classList.add('hidden');
@@ -188,7 +237,6 @@ gemPauseButton.addEventListener('click', () => {
 });
 
 gemStartButton.addEventListener('click', async function() {
-    const gemTypeElement = document.getElementById("gemType");
     const gemTypeName = gemTypeElement.options[gemTypeElement.selectedIndex].text;
     const calcByLevel = document.getElementById('calcByLevel').checked;
     const calcByShards = document.getElementById('calcByShards').checked;

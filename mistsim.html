@@ -113,7 +113,7 @@
 </div>
 <div id="gemSimulatorContainer" class="hidden">
     <h3>Gem Enhancement Simulator</h3>
-<p> Prices current as of Apr 12, 23:26 UTC. </p>
+<p> Prices update based on the selected server. </p>
 <p> From the game:
 Gem
 <ol> <li> Three gems of the same color and level can be combined to form a gem of the same color that is one level higher. </li>
@@ -149,24 +149,14 @@ However, in the game, counting by shards or arnebia is more of the dynamic - the
         <input type="number" id="numShards" min="1">
     </div>
     <!-- Gem type selection -->
+    <label for="gemServer">Server:</label>
+    <select id="gemServer">
+        <option value="server1" selected>Server 1</option>
+        <option value="server2">Server 2</option>
+    </select>
     <label for="gemType">Gem Type:</label>
     <select id="gemType">
         <option value="none" selected>No Gem Type</option>
-        <option value="turquoise" data-price="2045">Turquoise (Price: 2045)</option>
-        <option value="moonstone" data-price="1365">Moonstone  (Price: 1365)</option>
-        <option value="sunlight" data-price="78">Sunlight (Price: 78)</option>
-        <option value="obsidian" data-price="3465">Obsidian  (Price: 3465)</option>
-        <option value="topaz" data-price="21">Topaz (Price: 21)</option>
-        <option value="olivine" data-price="20">Olivine (Price: 20)</option>
-        <option value="grape" data-price="32">Grape stone (Price: 32)</option>
-        <option value="blond" data-price="5510">Blond jade (Price: 5510)</option>
-        <option value="garnet" data-price="5040">Garnet (Price: 5040)</option>
-        <option value="aquamarine" data-price="20">Aquamarine (Price: 20)</option>
-        <option value="spinnel" data-price="20">Spinnel (Price: 20)</option>
-        <option value="opal" data-price="2365">Opal (Price: 2365)</option>
-        <option value="tiger" data-price="2800">Tiger Eye stone (Price: 2800)</option>
-        <option value="sapphire" data-price="20">Sapphire (Price: 20)</option>
-        <option value="ruby" data-price="1800">Ruby (Price: 1800)</option>
     </select>
     <label for="ProtLevel">Use Gem Protection rune (399 diamond cost) </label>
     <select id="ProtLevel" disabled="true">
