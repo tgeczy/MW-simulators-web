@@ -19,11 +19,23 @@ const gemServerSelector = document.getElementById('gemServer');
 const interactiveGemCheckbox = document.getElementById('interactiveGemSimulation');
 const gemSoundContainer = document.getElementById('gemSoundContainer');
 const useGemSoundsCheckbox = document.getElementById('useGemSounds');
+const gemInventoryContainer = document.getElementById('gemInventoryContainer');
+const multipleGemInventoryContainer = document.getElementById('multipleGemInventoryContainer');
+const calcByMultiGemsRadio = document.getElementById('calcByMultiGems');
 
 const gemSounds = {
     success: new Audio('sounds/success_gem.wav'),
     fail: new Audio('sounds/failed_gem.wav')
 };
+
+function buildShardsPerGemLevel() {
+    const shardsPerGemLevel = [0];
+    shardsPerGemLevel[1] = 4;
+    for (let level = 2; level <= 9; level++) {
+        shardsPerGemLevel[level] = shardsPerGemLevel[level - 1] * 3;
+    }
+    return shardsPerGemLevel;
+}
 
 function toggleGemSoundOption() {
     const showSoundOption = interactiveGemCheckbox.checked;
@@ -133,12 +145,7 @@ async function calculateGemLevels(numShards, useExtraShard, ProtLevel, arnebiaPr
     let leftoverShardsByLevel = new Array(10).fill(0);
     let totalShardsUsed = 0;
     let runesUsed = 0;
-    let usedShardCounter = 0;
-    const shardsPerGemLevel = [0];
-    shardsPerGemLevel[1] = 4;
-    for (let level = 2; level <= 9; level++) {
-        shardsPerGemLevel[level] = shardsPerGemLevel[level - 1] * 3;
-    }
+    const shardsPerGemLevel = buildShardsPerGemLevel();
 
     gemLevels[1] = Math.floor(numShards / 4);
     leftoverShardsByLevel[1] = numShards % 4;
@@ -206,6 +213,60 @@ async function calculateGemLevels(numShards, useExtraShard, ProtLevel, arnebiaPr
     };
 }
 
+// Calculate gem upgrades starting from multiple gem levels instead of shards
+function calculateFromMultipleGems(gemEntries, useExtraShard, ProtLevel, arnebiaPrice) {
+    const gemLevels = new Array(10).fill(0);
+    const leftoverShardsByLevel = new Array(10).fill(0);
+    const shardsPerGemLevel = buildShardsPerGemLevel();
+    let runesUsed = 0;
+
+    gemEntries.forEach(({ level, count }) => {
+        const normalizedLevel = Math.max(1, Math.min(9, parseInt(level, 10)));
+        const normalizedCount = Math.max(0, parseInt(count, 10) || 0);
+        gemLevels[normalizedLevel] += normalizedCount;
+    });
+
+    const totalStartingShards = gemLevels.reduce((total, count, level) => {
+        return total + (count * (shardsPerGemLevel[level] || 0));
+    }, 0);
+
+    for (let currentLevel = 1; currentLevel < 9; currentLevel++) {
+        while (gemLevels[currentLevel] >= 3) {
+            let successRate = 0.50; // Default success rate
+            const isProtected = currentLevel >= ProtLevel;
+            if (useExtraShard && leftoverShardsByLevel[currentLevel] > 0 && !isProtected) {
+                successRate = 0.70; // Increased success rate when using an extra shard
+            }
+
+            if (isSuccess(successRate)) {
+                gemLevels[currentLevel] -= 3;
+                gemLevels[currentLevel + 1] += 1;
+                if (useExtraShard && leftoverShardsByLevel[currentLevel] > 0 && !isProtected) {
+                    leftoverShardsByLevel[currentLevel]--; // Decrementing an extra shard if used
+                }
+            } else {
+                if (!isProtected) {
+                    leftoverShardsByLevel[currentLevel]++;
+                    gemLevels[currentLevel]--;
+                }
+                runesUsed += isProtected ? 1 : 0;
+            }
+        }
+    }
+
+    const leftoverShards = leftoverShardsByLevel.reduce((a, b) => a + b, 0);
+    const shardsUsed = Math.max(0, totalStartingShards - leftoverShards);
+
+    return {
+        shardsUsed,
+        totalGemCreationCost: shardsUsed * arnebiaPrice,
+        gemLevels,
+        leftoverShards,
+        leftoverShardsByLevel,
+        runesUsed
+    };
+}
+
 // Calculate target gem level from shards
 function calculateTargetGemLevel(numShards, targetGemLevel, useExtraShard) {
     let shardsNeeded = 4;
@@ -240,6 +301,7 @@ document.getElementById('calcByLevel').addEventListener('change', function() {
     document.getElementById('numShardsContainer').classList.add('hidden');
     document.getElementById('arnebiaContainer').classList.add('hidden');
     document.getElementById('ProtLevel').setAttribute('disabled', true);
+    multipleGemInventoryContainer.classList.add('hidden');
 });
 
 document.getElementById('calcByShards').addEventListener('change', function() {
@@ -247,12 +309,26 @@ document.getElementById('calcByShards').addEventListener('change', function() {
     document.getElementById('numShardsContainer').classList.remove('hidden');
     document.getElementById('arnebiaContainer').classList.add('hidden');
     document.getElementById('ProtLevel').removeAttribute('disabled');
+    multipleGemInventoryContainer.classList.add('hidden');
 });
 
 document.getElementById('calcByArnebia').addEventListener('change', function() {
     document.getElementById('targetGemLevelContainer').classList.add('hidden');
     document.getElementById('numShardsContainer').classList.add('hidden');
     document.getElementById('arnebiaContainer').classList.remove('hidden');
+    document.getElementById('ProtLevel').removeAttribute('disabled');
+    multipleGemInventoryContainer.classList.add('hidden');
+});
+
+// NEW aggregator radio
+calcByMultiGemsRadio.addEventListener('change', function() {
+    document.getElementById('targetGemLevelContainer').classList.add('hidden');
+    document.getElementById('numShardsContainer').classList.add('hidden');
+    document.getElementById('arnebiaContainer').classList.add('hidden');
+    if (gemInventoryContainer) {
+        gemInventoryContainer.classList.add('hidden');
+    }
+    multipleGemInventoryContainer.classList.remove('hidden');
     document.getElementById('ProtLevel').removeAttribute('disabled');
 });
 
@@ -271,6 +347,7 @@ gemStartButton.addEventListener('click', async function() {
     const calcByLevel = document.getElementById('calcByLevel').checked;
     const calcByShards = document.getElementById('calcByShards').checked;
     const calcByArnebia = document.getElementById('calcByArnebia').checked;
+    const calcByMultiGems = calcByMultiGemsRadio.checked;
     const useExtraShard = document.getElementById('useExtraShard').checked;
     const interactiveGemSimulation = interactiveGemCheckbox.checked;
     gemSoundMode = interactiveGemSimulation && useGemSoundsCheckbox.checked;
@@ -289,6 +366,14 @@ gemStartButton.addEventListener('click', async function() {
 
     if (gemRunning) {
         appendGemLog('A gem simulation is already running. Please wait or pause it first.');
+        return;
+    }
+
+    else if (calcByMultiGems) {
+        // We'll handle this in gem-aggregator.js (see that file).
+        // The aggregator code will build an array and call "calculateFromMultipleGems()" internally.
+        // We'll leave resultMessage blank here. The aggregator will fill it.
+        // But let's return so we don't overwrite aggregator results:
         return;
     }
 
